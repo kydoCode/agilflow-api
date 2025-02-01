@@ -1,1 +1,9 @@
-// Here some code to deploy the project on Vercel
+{
+    "version": 2,
+    "builds": [
+      { "src": "app.js", "use": "@vercel/node" }
+    ],
+    "routes": [
+      { "src": "/(.*)", "dest": "app.js" }
+    ]
+  }
