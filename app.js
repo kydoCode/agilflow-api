@@ -52,3 +52,4 @@ sequelize.sync({ force: false, alter: false }).then(() => {
   })
 })
 
+module.exports = app; 
