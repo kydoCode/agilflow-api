@@ -9,7 +9,21 @@ const userStoriesRoutes = require('./routes/userStoriesRoutes')
 
 const app = express();
 
-app.use(cors())
+const corsOptions = {
+   origin: [
+     'https://www.agilflow.app/',  // URL de production Vercel
+   //   'http://localhost:5173',                  // URL de développement local pour Vite
+     'http://127.0.0.1:5173',                  // Alternative pour le développement local
+   //   'http://localhost:3000',                  // Au cas où vous utiliseriez aussi ce port
+     'http://127.0.0.1:3000'                   // Alternative pour le port 3000
+   ],
+   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+   allowedHeaders: ['Content-Type', 'Authorization'],
+   credentials: true,                          // Permet l'envoi de cookies
+   optionsSuccessStatus: 204                   // Pour la compatibilité avec certains navigateurs
+ };
+
+app.use(cors(corsOptions));
 
 app.use((req, res, next) => {
    res.header("Access-Control-Allow-Origin", "*");
