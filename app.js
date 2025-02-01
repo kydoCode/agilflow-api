@@ -11,10 +11,8 @@ const app = express();
 
 const corsOptions = {
    origin: [
-     'https://www.agilflow.app/',  // URL de production Vercel
-   //   'http://localhost:5173',                  // URL de développement local pour Vite
-     'http://127.0.0.1:5173',                  // Alternative pour le développement local
-   //   'http://localhost:3000',                  // Au cas où vous utiliseriez aussi ce port
+     'https://www.agilflow.app',  // URL de production Vercel
+     'http://127.0.0.1:5173',                  // URL de développement local pour Vite
      'http://127.0.0.1:3000'                   // Alternative pour le port 3000
    ],
    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
@@ -25,12 +23,12 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-app.use((req, res, next) => {
-   res.header("Access-Control-Allow-Origin", "*");
-   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
-   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH");
-   next();
-})
+// app.use((req, res, next) => {
+//    res.header("Access-Control-Allow-Origin", "*");
+//    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+//    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH");
+//    next();
+// })
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
