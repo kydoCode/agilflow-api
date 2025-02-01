@@ -1,5 +1,5 @@
 {
-  "name": "agiflow-mvp-api",
+  "name": "agilflow-api",
   "version": "1.0.0",
   "main": "app.js",
   "scripts": {
@@ -7,7 +7,6 @@
   },
   "author": "",
   "license": "ISC",
-  "description": "",
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.3",
@@ -16,7 +15,9 @@
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
     "mysql2": "^3.12.0",
+    "nodemon": "^3.1.9",
     "pg": "^8.13.1",
     "sequelize": "^6.37.5"
-  }
+  },
+  "description": ""
 }
