@@ -9,8 +9,24 @@ const userStoriesRoutes = require('./routes/userStoriesRoutes');
 
 const app = express();
 
+const whitelist = ['http://localhost:5173', 'http://127.0.0.1:5173', 'https://www.agilflow.app'];
+
+// const corsOptions = {
+//   origin: [...whitelist],
+//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+//   allowedHeaders: ['Content-Type', 'Authorization'],
+//   credentials: true,
+//   optionsSuccessStatus: 204,
+// };
+
 const corsOptions = {
-  origin: ['http://localhost:5173', 'https://www.agilflow.app'],
+  origin: function (origin, callback) {
+    if (whitelist.indexOf(origin) !== -1 || !origin) {
+      callback(null, true)
+    } else {
+      callback(new Error('Not allowed by CORS'))
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
