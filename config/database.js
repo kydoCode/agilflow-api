@@ -13,6 +13,7 @@ if (!process.env.DB_URL) {
   throw new Error('Database URL is missing');
 }
 
+try {
 const sequelize = new Sequelize(process.env.DB_URL, {
     dialect: 'postgres',
     dialectOptions: {
@@ -22,5 +23,8 @@ const sequelize = new Sequelize(process.env.DB_URL, {
       }
     }
   });
-
+} catch (error) {
+  console.error('Erreur lors de la création de Sequelize:', error);
+  throw error;
+}
 module.exports = sequelize;
