@@ -7,6 +7,11 @@ require('dotenv').config();
 //    logging: false,
 // });
 
+if (!process.env.DB_URL) {
+  console.error('DB_URL is not defined in environment variables');
+  throw new Error('Database URL is missing');
+}
+
 const sequelize = new Sequelize(process.env.DB_URL, {
     dialect: 'postgres',
     dialectOptions: {
