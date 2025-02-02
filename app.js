@@ -10,10 +10,7 @@ const userStoriesRoutes = require('./routes/userStoriesRoutes');
 const app = express();
 
 const corsOptions = {
-  origin: [
-    'https://www.agilflow.app',
-    'http://localhost:5173',
-  ],
+  origin: ['http://localhost:5173', 'https://www.agilflow.app'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
