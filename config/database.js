@@ -6,7 +6,7 @@ require('dotenv').config();
 //    dialect: 'mysql',
 //    logging: false,
 // });
-console.log("DATABASE_URL:", process.env.DATABASE_URL);
+// console.log("DATABASE_URL:", process.env.DATABASE_URL);
 
 if (!process.env.DATABASE_URL) {
   console.error('DATABASE_URL is not defined in environment variables');
