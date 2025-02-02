@@ -27,6 +27,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 // Routes
 app.use('/api/auth', authRoutes);
+
+app.options('/api/auth/login', cors(corsOptions));
 app.use('/api/userstories', userStoriesRoutes);
 
 app.get('/', (req, res) => {
