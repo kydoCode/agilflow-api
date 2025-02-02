@@ -21,14 +21,13 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+app.options('*', cors(corsOptions)); // Enable CORS for all OPTIONS requests
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Routes
 app.use('/api/auth', authRoutes);
-
-app.options('/api/auth/login', cors(corsOptions));
 app.use('/api/userstories', userStoriesRoutes);
 
 app.get('/', (req, res) => {
