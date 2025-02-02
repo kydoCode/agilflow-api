@@ -20,7 +20,7 @@
     "nodemon": "^3.1.9",
     "pg": "^8.13.1",
     "sequelize": "^6.37.5",
-    "vercel": "^28.18.5"
+    "vercel": "^40.1.0"
   },
   "description": ""
 }
