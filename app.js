@@ -25,9 +25,9 @@ app.use(cors(corsOptions));
 
 // app.use((req, res, next) => {
 //    res.header("Access-Control-Allow-Origin", "*");
-//    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
-//    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH");
-//    next();
+//     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+//     res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH");
+//     next();
 // })
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -50,4 +50,4 @@ sequelize.sync({ force: false, alter: false }).then(() => {
   })
 })
 
-module.exports = app; 
+module.exports = app;
