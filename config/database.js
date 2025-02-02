@@ -9,7 +9,7 @@ require('dotenv').config();
 console.log("DATABASE_URL:", process.env.DATABASE_URL);
 
 if (!process.env.DATABASE_URL) {
-  console.error('DB_URL is not defined in environment variables');
+  console.error('DATABASE_URL is not defined in environment variables');
   throw new Error('Database URL is missing');
 }
 
