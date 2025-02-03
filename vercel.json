@@ -1,10 +1,15 @@
 {
-    "version": 2,
-    "builds": [
-      { "src": "app.js", "use": "@vercel/node" }
-    ],
-    "routes": [
-      { "src": "/(.*)", "dest": "app.js", "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"] }
-    ]
+  "version": 2,
+  "builds": [
+    { 
+      "src": "app.js", 
+      "use": "@vercel/node",
+      "config": {
+        "installCommand": "npm install && npm install pg"
+      }
+    }
+  ],
+  "routes": [
+    { "src": "/(.*)", "dest": "app.js", "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"] }
+  ]
 }
-
