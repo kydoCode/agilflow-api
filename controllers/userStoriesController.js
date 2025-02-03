@@ -3,9 +3,10 @@ const { UserStories, User } = require('../models');
 //  getUserStories
 exports.getUserStories = async (req, res) => {
     try {
-      const userStories = await UserStories.findAll({
-         include: [{ model: User, as: 'assignee', attributes: ['id', 'name', 'role'] }],
-      });
+        const { user } = req;
+        const { id } = user;
+        const userStories = await UserStories.findAll({ where: { assignedToId: id } });
+        console.log("userStories:", userStories);
         res.status(200).json(userStories);
     } catch (error) {
         res.status(500).json({ message: 'Error getting user stories' });
@@ -58,20 +59,24 @@ exports.createUserStory = async (req, res, next) => {
 exports.updateUserStory = async (req, res, next) => {
    try {
        const { id } = req.params;
-
+   
        const updateData = { ...req.body };
-       if (req.user) {
-           updateData.assignedToId = req.user.id; // Only set assignedToId if user is logged in
+
+       const userStory = await UserStories.findByPk(id)
+
+       if (userStory.assignedToId !== req.user.id) {
+           return res.status(403).json({ message: 'You are not authorized to update this user story.' });
        }
-       const [updated] = await UserStories.update(updateData, {
-           where: { id },
-       });
+
+
+       const updated = await UserStories.update(updateData, {
+           where: { id }
+       })
 
        if (!updated) {
            return res.status(404).json({ message: 'User Story not found' });
        }
-       const updatedUserStory = await UserStories.findByPk(id, { include: [{ model: User, as: 'assignee' }] });
-       res.status(200).json(updatedUserStory);
+       res.status(200).json(updateData);
    } catch (error) {
        next(error);
    }
@@ -80,17 +85,23 @@ exports.updateUserStory = async (req, res, next) => {
 exports.deleteUserStory = async (req, res, next) => {
    try {
        const { id } = req.params;
+
+       const userStory = await UserStories.findByPk(id)
+
+       if (userStory.assignedToId !== req.user.id) {
+        return res.status(403).json({ message: 'You are not authorized to delete this user story.' });
+    }
+
        const deleted = await UserStories.destroy({
            where: { id },
        });
+
        if (!deleted) {
            return res.status(404).json({ message: 'User Story not found' });
        }
-       // Fetch the deleted user story with UsersInvolved before returning
-       const deletedUserStory = await UserStories.findByPk(id, { include: [{ model: User, as: 'assignee' }] });
 
        // we shall return the deleted user story and message
-       res.status(200).json({ message: 'User Story deleted successfully', deletedUserStory });
+       res.status(200).json({ message: 'User Story deleted successfully'});
        // res.status(204).end();
    } catch (error) {
        next(error);

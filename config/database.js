@@ -24,11 +24,4 @@ const sequelize = new Sequelize(process.env.DATABASE_URL, {
     }
   });
 
-sequelize.authenticate()
-.then(() => console.log('Connection to the database has been established successfully.'))
-.catch(error => {
-  console.error('Erreur lors de la création de Sequelize:', error);
-  throw error;
-});
-
 module.exports = sequelize;
