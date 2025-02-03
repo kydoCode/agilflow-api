@@ -19,7 +19,8 @@ const UserStories = sequelize.define('UserStories', {
       type: DataTypes.ENUM('low', 'medium', 'high'),
       allowNull: false,
       defaultValue: 'low',
-   }, role: {
+   }, 
+   role: {
       type: DataTypes.STRING,
       allowNull: true, // Role is optional
    },
