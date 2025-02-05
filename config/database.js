@@ -1,6 +1,7 @@
 const { Sequelize } = require('sequelize');
 require('dotenv').config();
-import pg from 'pg'
+// import pg from 'pg'
+const pg = require('pg');
 
 if (!process.env.DATABASE_URL) {
   console.error('DATABASE_URL is not defined in environment variables');
