@@ -5,6 +5,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import sequelize from './config/database.js';
 import logger from './config/logger.js';
+import errorHandler from './middleware/errorHandler.js';
 import dotenv from 'dotenv';
 
 import authRoutes from './routes/authRoutes.js';
@@ -71,31 +72,8 @@ app.get('/', (req, res) => {
   res.send('Le serveur est en route. version:1.0.0');
 });
 
-// Middleware de gestion des erreurs globale
-app.use((err, req, res, next) => {
-  logger.error('Erreur serveur', {
-    error: err.message,
-    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
-    url: req.url,
-    method: req.method,
-    ip: req.ip,
-    userAgent: req.get('User-Agent'),
-    timestamp: new Date().toISOString()
-  });
-  
-  if (process.env.NODE_ENV === 'production') {
-    res.status(err.status || 500).json({ 
-      success: false,
-      message: 'Erreur interne du serveur' 
-    });
-  } else {
-    res.status(err.status || 500).json({ 
-      success: false,
-      message: err.message, 
-      stack: err.stack 
-    });
-  }
-});
+// Middleware de gestion des erreurs (doit être en dernier)
+app.use(errorHandler);
 
 
 const port = process.env.PORT || 3000;
