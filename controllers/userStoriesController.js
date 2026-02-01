@@ -1,4 +1,5 @@
 import { UserStories, User } from '../models/index.js';
+import { Op } from 'sequelize';
 import { NotFoundError, AuthorizationError } from '../utils/errors/AppError.js';
 import { sendSuccess } from '../utils/responses/apiResponse.js';
 
@@ -6,8 +7,47 @@ export const getUserStories = async (req, res, next) => {
     try {
         const { user } = req;
         const { id } = user;
-        const userStories = await UserStories.findAll({ where: { assignedToId: id } });
-        sendSuccess(res, userStories);
+        
+        // Pagination
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const offset = (page - 1) * limit;
+        
+        // Filtres
+        const where = { assignedToId: id };
+        if (req.query.status) where.status = req.query.status;
+        if (req.query.priority) where.priority = req.query.priority;
+        
+        // Recherche textuelle
+        if (req.query.search) {
+            where[Op.or] = [
+                { action: { [Op.iLike]: `%${req.query.search}%` } },
+                { need: { [Op.iLike]: `%${req.query.search}%` } }
+            ];
+        }
+        
+        // Tri
+        const sortBy = req.query.sortBy || 'createdAt';
+        const order = req.query.order === 'asc' ? 'ASC' : 'DESC';
+        
+        const { count, rows } = await UserStories.findAndCountAll({
+            where,
+            limit,
+            offset,
+            order: [[sortBy, order]]
+        });
+        
+        const totalPages = Math.ceil(count / limit);
+        
+        sendSuccess(res, {
+            userStories: rows,
+            pagination: {
+                currentPage: page,
+                totalPages,
+                totalItems: count,
+                itemsPerPage: limit
+            }
+        });
     } catch (error) {
         next(error);
     }

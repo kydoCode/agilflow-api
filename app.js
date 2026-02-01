@@ -3,9 +3,11 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import swaggerUi from 'swagger-ui-express';
 import sequelize from './config/database.js';
 import logger from './config/logger.js';
 import errorHandler from './middleware/errorHandler.js';
+import swaggerSpec from './config/swagger.js';
 import dotenv from 'dotenv';
 
 import authRoutes from './routes/authRoutes.js';
@@ -67,6 +69,9 @@ app.use(globalLimiter);
 // Routes
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/userstories', userStoriesRoutes);
+
+// Documentation Swagger
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.get('/', (req, res) => {
   res.send('Le serveur est en route. version:1.0.0');
