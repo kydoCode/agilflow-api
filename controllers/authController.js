@@ -1,8 +1,11 @@
-const { User } = require('../models');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+import { User } from '../models/index.js';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
-exports.login = async (req, res) => {
+// Durée de validité du token : 1 heure
+const TOKEN_EXPIRATION = '1h';
+
+export const login = async (req, res) => {
    try {
       const { email, password } = req.body;
       const user = await User.findOne({ where: { email } });
@@ -15,21 +18,37 @@ exports.login = async (req, res) => {
          return res.status(400).json({ message: 'Invalid email or password' });
       }
 
-      const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET);
+      // Générer le token avec expiration
+      const token = jwt.sign(
+        { id: user.id, email: user.email, role: user.role }, 
+        process.env.JWT_SECRET,
+        { expiresIn: TOKEN_EXPIRATION }
+      );
       // Remove password from response
       const userToReturn = user.get({ plain: true });
       delete userToReturn.password;
       delete userToReturn.createdAt;
       delete userToReturn.updatedAt;
 
-      res.status(200).json({ message: 'Logged in successfully', user: userToReturn, token });
+      res.status(200).json({ 
+        success: true,
+        message: 'Connexion réussie', 
+        data: {
+          user: userToReturn, 
+          token,
+          expiresIn: TOKEN_EXPIRATION
+        }
+      });
    } catch (error) {
       console.error(error);
-      res.status(500).json({ message: 'Error logging in user' });
+      res.status(500).json({ 
+        success: false,
+        message: 'Erreur lors de la connexion' 
+      });
    }
 }
 
-exports.register = async (req, res) => {
+export const register = async (req, res) => {
    try {
       const { email, name, password, role } = req.body;
 
@@ -45,11 +64,31 @@ exports.register = async (req, res) => {
 
       const hashedPassword = await bcrypt.hash(password, 10);
       const newUser = await User.create({ email, name, password: hashedPassword, role });
-      const token = jwt.sign({ id: newUser.id }, process.env.JWT_SECRET);
+      // Générer le token avec expiration
+      const token = jwt.sign(
+        { id: newUser.id, email: newUser.email, role: newUser.role }, 
+        process.env.JWT_SECRET,
+        { expiresIn: TOKEN_EXPIRATION }
+      );
 
-      res.status(201).json({ message: 'User created successfully', user: newUser, token });
+      // Retirer le mot de passe de la réponse
+      const userToReturn = newUser.get({ plain: true });
+      delete userToReturn.password;
+
+      res.status(201).json({ 
+        success: true,
+        message: 'Utilisateur créé avec succès', 
+        data: {
+          user: userToReturn, 
+          token,
+          expiresIn: TOKEN_EXPIRATION
+        }
+      });
    } catch (error) {
       console.error(error);
-      res.status(500).json({ message: 'Error creating user' });
+      res.status(500).json({ 
+        success: false,
+        message: 'Erreur lors de la création de l\'utilisateur' 
+      });
    }
 }
