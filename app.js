@@ -1,17 +1,28 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import sequelize from './config/database.js';
+import logger from './config/logger.js';
 import dotenv from 'dotenv';
 
-// Import routes
 import authRoutes from './routes/authRoutes.js';
 import userStoriesRoutes from './routes/userStoriesRoutes.js';
 
-// Charger les variables d'environnement
 dotenv.config();
 
 const app = express();
+
+// Helmet pour la sécurité des headers
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"]
+    }
+  }
+}));
 
 // Configuration CORS sécurisée
 const allowedOrigins = process.env.NODE_ENV === 'production'
@@ -20,7 +31,6 @@ const allowedOrigins = process.env.NODE_ENV === 'production'
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Autoriser les requêtes sans origin (mobile apps, curl, etc.)
     if (!origin) return callback(null, true);
     if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
@@ -36,8 +46,25 @@ app.use(cors({
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// Rate limiting global (30 req/15min - protection anti-scan)
+const globalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 30,
+  message: { success: false, message: 'Trop de requêtes, veuillez réessayer plus tard' }
+});
+
+// Rate limiting auth (5 tentatives/15min - protection anti-dictionnaire)
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  skipSuccessfulRequests: true,
+  message: { success: false, message: 'Trop de tentatives de connexion, veuillez réessayer dans 15 minutes' }
+});
+
+app.use(globalLimiter);
+
 // Routes
-app.use('/api/auth', authRoutes);
+app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/userstories', userStoriesRoutes);
 
 app.get('/', (req, res) => {
@@ -46,8 +73,7 @@ app.get('/', (req, res) => {
 
 // Middleware de gestion des erreurs globale
 app.use((err, req, res, next) => {
-  // Logger l'erreur avec contexte
-  console.error('Erreur serveur:', {
+  logger.error('Erreur serveur', {
     error: err.message,
     stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
     url: req.url,
@@ -57,7 +83,6 @@ app.use((err, req, res, next) => {
     timestamp: new Date().toISOString()
   });
   
-  // Réponse selon l'environnement
   if (process.env.NODE_ENV === 'production') {
     res.status(err.status || 500).json({ 
       success: false,
@@ -76,6 +101,7 @@ app.use((err, req, res, next) => {
 const port = process.env.PORT || 3000;
 
 sequelize.sync({ force: false, alter: false }).then(() => {
+  logger.info(`Server is running on port ${port}`);
   app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
   });
