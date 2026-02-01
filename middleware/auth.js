@@ -1,27 +1,69 @@
-const jwt = require('jsonwebtoken');
-const { User } = require('../models');
-require('dotenv').config();
+import jwt from 'jsonwebtoken';
+import { User } from '../models/index.js';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const authMiddleware = async (req, res, next) => {
    try {
-      const token = req.headers.authorization.split(' ')[1];
-
-      if(!token){
-         return res.status(401).send({ error: 'Please authenticate' });
+      // Vérifier la présence du header Authorization
+      const authHeader = req.headers.authorization;
+      
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+         return res.status(401).json({ 
+            success: false,
+            error: 'Token manquant ou format invalide. Format attendu: Bearer <token>' 
+         });
       }
 
+      // Extraire le token
+      const token = authHeader.split(' ')[1];
+
+      if (!token) {
+         return res.status(401).json({ 
+            success: false,
+            error: 'Token manquant' 
+         });
+      }
+
+      // Vérifier et décoder le token
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      
+      // Récupérer l'utilisateur
       const user = await User.findByPk(decoded.id);
 
-      if(!user){
-         return res.status(401).send({ error: 'Authentication failed' });
+      if (!user) {
+         return res.status(401).json({ 
+            success: false,
+            error: 'Utilisateur non trouvé ou token invalide' 
+         });
       }
 
+      // Attacher l'utilisateur à la requête
       req.user = user;
-      next()
+      next();
    } catch (error) {
-      res.status(401).send({ error: 'Please authenticate' });
-   }
-}
+      // Gestion des erreurs spécifiques JWT
+      if (error.name === 'TokenExpiredError') {
+         return res.status(401).json({ 
+            success: false,
+            error: 'Token expiré. Veuillez vous reconnecter' 
+         });
+      }
+      
+      if (error.name === 'JsonWebTokenError') {
+         return res.status(401).json({ 
+            success: false,
+            error: 'Token invalide' 
+         });
+      }
 
-module.exports = authMiddleware;
+      // Erreur générique
+      res.status(401).json({ 
+         success: false,
+         error: 'Authentification échouée' 
+      });
+   }
+};
+
+export default authMiddleware;
