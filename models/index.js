@@ -1,8 +1,7 @@
-const User = require('./User');
-const UserStories = require('./UserStories');
+import User from './User.js';
+import UserStories from './UserStories.js';
 
-
-module.exports = {
+export {
    User,
    UserStories
-}
+};

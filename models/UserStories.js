@@ -1,5 +1,5 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+import { DataTypes } from 'sequelize';
+import sequelize from '../config/database.js';
 
 const UserStories = sequelize.define('UserStories', {
    action: {
@@ -22,7 +22,7 @@ const UserStories = sequelize.define('UserStories', {
    }, 
    role: {
       type: DataTypes.STRING,
-      allowNull: true, // Role is optional
+      allowNull: true,
    },
    assignedToId: {
       type: DataTypes.INTEGER,
@@ -32,6 +32,6 @@ const UserStories = sequelize.define('UserStories', {
          key: 'id',
       }
    }
-})
+});
 
-module.exports = UserStories;
+export default UserStories;

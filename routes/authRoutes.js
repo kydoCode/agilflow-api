@@ -1,11 +1,10 @@
-const express = require('express');
+import express from 'express';
+import { login, register } from '../controllers/authController.js';
+
 const router = express.Router();
-const authController = require('../controllers/authController');
-const cors = require('cors');
 
-router.options('*', cors()); // Ajoutez cette ligne
-router.post('/login', authController.login);
-router.post('/register', authController.register);
+// Routes d'authentification
+router.post('/login', login);
+router.post('/register', register);
 
-
-module.exports = router;
+export default router;
