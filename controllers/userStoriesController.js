@@ -1,38 +1,28 @@
 import { UserStories, User } from '../models/index.js';
+import { NotFoundError, AuthorizationError } from '../utils/errors/AppError.js';
+import { sendSuccess } from '../utils/responses/apiResponse.js';
 
-export const getUserStories = async (req, res) => {
+export const getUserStories = async (req, res, next) => {
     try {
         const { user } = req;
         const { id } = user;
         const userStories = await UserStories.findAll({ where: { assignedToId: id } });
-        res.status(200).json({ 
-            success: true,
-            data: userStories 
-        });
+        sendSuccess(res, userStories);
     } catch (error) {
-        res.status(500).json({ 
-            success: false,
-            message: 'Erreur lors de la récupération des user stories' 
-        });
+        next(error);
     }
 };
 
 export const getUserStoryById = async (req, res, next) => {
    try {
        const { id } = req.params;
-       const userStory = await UserStories.findByPk(id, { include: [{ model: User, as: 'assignee' }] });
+       const userStory = await UserStories.findByPk(id);
        
        if (!userStory) {
-           return res.status(404).json({ 
-               success: false,
-               message: 'User Story introuvable' 
-           });
+           throw new NotFoundError('User Story introuvable');
        }
        
-       res.status(200).json({ 
-           success: true,
-           data: userStory 
-       });
+       sendSuccess(res, userStory);
    } catch (error) {
        next(error);
    }
@@ -41,13 +31,6 @@ export const getUserStoryById = async (req, res, next) => {
 export const createUserStory = async (req, res, next) => {
    try {
        const { action, need, status, priority, userIds, role } = req.body;
-
-       if (!action || !need) {
-           return res.status(400).json({ 
-               success: false,
-               error: 'Les champs action et need sont obligatoires' 
-           });
-       }
 
        const userStory = await UserStories.create({
            role,
@@ -63,12 +46,8 @@ export const createUserStory = async (req, res, next) => {
            await userStory.addUsersInvolved(users);
        }
 
-       res.status(201).json({ 
-           success: true,
-           data: {...userStory.toJSON(), id: userStory.id} 
-       });
+       sendSuccess(res, {...userStory.toJSON(), id: userStory.id}, 'User Story créée avec succès', 201);
    } catch (error) {
-       console.error("Erreur dans createUserStory:", error);
        next(error);
    }
 };
@@ -80,28 +59,17 @@ export const updateUserStory = async (req, res, next) => {
 
        const userStory = await UserStories.findByPk(id);
 
-       // Vérifier d'abord si la ressource existe
        if (!userStory) {
-           return res.status(404).json({ 
-               success: false,
-               message: 'User Story introuvable' 
-           });
+           throw new NotFoundError('User Story introuvable');
        }
 
-       // Ensuite vérifier l'autorisation
        if (userStory.assignedToId !== req.user.id) {
-           return res.status(403).json({ 
-               success: false,
-               message: 'Vous n\'êtes pas autorisé à modifier cette user story' 
-           });
+           throw new AuthorizationError('Vous n\'êtes pas autorisé à modifier cette user story');
        }
 
        await UserStories.update(updateData, { where: { id } });
 
-       res.status(200).json({ 
-           success: true,
-           data: updateData 
-       });
+       sendSuccess(res, updateData, 'User Story mise à jour avec succès');
    } catch (error) {
        next(error);
    }
@@ -113,28 +81,17 @@ export const deleteUserStory = async (req, res, next) => {
 
        const userStory = await UserStories.findByPk(id);
 
-       // Vérifier d'abord si la ressource existe
        if (!userStory) {
-           return res.status(404).json({ 
-               success: false,
-               message: 'User Story introuvable' 
-           });
+           throw new NotFoundError('User Story introuvable');
        }
 
-       // Ensuite vérifier l'autorisation
        if (userStory.assignedToId !== req.user.id) {
-           return res.status(403).json({ 
-               success: false,
-               message: 'Vous n\'êtes pas autorisé à supprimer cette user story' 
-           });
+           throw new AuthorizationError('Vous n\'êtes pas autorisé à supprimer cette user story');
        }
 
        await UserStories.destroy({ where: { id } });
 
-       res.status(200).json({ 
-           success: true,
-           message: 'User Story supprimée avec succès' 
-       });
+       sendSuccess(res, null, 'User Story supprimée avec succès');
    } catch (error) {
        next(error);
    }
