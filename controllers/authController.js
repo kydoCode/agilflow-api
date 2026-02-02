@@ -91,3 +91,65 @@ export const register = async (req, res) => {
       });
    }
 }
+
+export const getProfile = async (req, res) => {
+   try {
+      const user = await User.findByPk(req.user.id);
+      if (!user) {
+         return res.status(404).json({ 
+            success: false,
+            message: 'Utilisateur introuvable' 
+         });
+      }
+
+      const userToReturn = user.get({ plain: true });
+      delete userToReturn.password;
+      delete userToReturn.updatedAt;
+
+      res.status(200).json(userToReturn);
+   } catch (error) {
+      logger.error('Erreur lors de la récupération du profil', { error: error.message });
+      res.status(500).json({ 
+         success: false,
+         message: 'Erreur serveur' 
+      });
+   }
+}
+
+export const changePassword = async (req, res) => {
+   try {
+      const { oldPassword, newPassword } = req.body;
+      const user = await User.findByPk(req.user.id);
+
+      if (!user) {
+         return res.status(404).json({ 
+            success: false,
+            message: 'Utilisateur introuvable' 
+         });
+      }
+
+      const validPassword = await bcrypt.compare(oldPassword, user.password);
+      if (!validPassword) {
+         logger.warn(`Tentative de changement de mot de passe échouée - ancien mot de passe invalide: ${user.email}`);
+         return res.status(400).json({ 
+            success: false,
+            message: 'Ancien mot de passe incorrect' 
+         });
+      }
+
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      await user.update({ password: hashedPassword });
+
+      logger.info(`Mot de passe modifié: ${user.email}`);
+      res.status(200).json({ 
+         success: true,
+         message: 'Mot de passe modifié avec succès' 
+      });
+   } catch (error) {
+      logger.error('Erreur lors du changement de mot de passe', { error: error.message });
+      res.status(500).json({ 
+         success: false,
+         message: 'Erreur serveur' 
+      });
+   }
+}

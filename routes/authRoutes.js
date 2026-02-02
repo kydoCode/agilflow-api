@@ -1,7 +1,8 @@
 import express from 'express';
-import { login, register } from '../controllers/authController.js';
+import { login, register, getProfile, changePassword } from '../controllers/authController.js';
 import { validate } from '../middleware/validate.js';
-import { loginSchema, registerSchema } from '../validators/authValidator.js';
+import { loginSchema, registerSchema, changePasswordSchema } from '../validators/authValidator.js';
+import authMiddleware from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -68,5 +69,53 @@ router.post('/login', validate(loginSchema), login);
  *         description: Erreur de validation
  */
 router.post('/register', validate(registerSchema), register);
+
+/**
+ * @swagger
+ * /api/auth/profile:
+ *   get:
+ *     summary: Récupérer le profil utilisateur
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Profil récupéré
+ *       401:
+ *         description: Non autorisé
+ */
+router.get('/profile', authMiddleware, getProfile);
+
+/**
+ * @swagger
+ * /api/auth/change-password:
+ *   put:
+ *     summary: Modifier le mot de passe
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - oldPassword
+ *               - newPassword
+ *             properties:
+ *               oldPassword:
+ *                 type: string
+ *               newPassword:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Mot de passe modifié
+ *       400:
+ *         description: Ancien mot de passe incorrect
+ *       401:
+ *         description: Non autorisé
+ */
+router.put('/change-password', authMiddleware, validate(changePasswordSchema), changePassword);
 
 export default router;
