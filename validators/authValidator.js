@@ -13,7 +13,7 @@ export const registerSchema = Joi.object({
       'string.min': 'Le mot de passe doit contenir au moins 6 caractères',
       'any.required': 'Mot de passe requis'
    }),
-   role: Joi.string().valid('developer', 'product_owner', 'scrum_master').required().messages({
+   role: Joi.string().valid('developer', 'product owner', 'tester', 'teammate', 'scrum master', 'administrator').required().messages({
       'any.only': 'Rôle invalide',
       'any.required': 'Rôle requis'
    })
