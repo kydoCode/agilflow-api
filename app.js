@@ -49,17 +49,17 @@ app.use(cors({
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Rate limiting global (100 req/15min en dev, 30 en prod)
+// Rate limiting global (500 req/15min en dev, 30 en prod)
 const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: process.env.NODE_ENV === 'production' ? 30 : 100,
+  max: process.env.NODE_ENV === 'production' ? 30 : 500,
   message: { success: false, message: 'Trop de requêtes, veuillez réessayer plus tard' }
 });
 
-// Rate limiting auth (5 tentatives/15min - protection anti-dictionnaire)
+// Rate limiting auth (10 tentatives/15min en dev, 5 en prod - protection anti-dictionnaire)
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 5,
+  max: process.env.NODE_ENV === 'production' ? 5 : 10,
   skipSuccessfulRequests: true,
   message: { success: false, message: 'Trop de tentatives de connexion, veuillez réessayer dans 15 minutes' }
 });
