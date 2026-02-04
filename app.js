@@ -28,16 +28,29 @@ app.use(helmet({
 }));
 
 // Configuration CORS sécurisée
-const allowedOrigins = process.env.NODE_ENV === 'production'
-  ? ['https://www.agilflow.app', 'https://agilflow.app']
-  : ['http://localhost:5173', 'http://localhost:3000'];
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'https://www.agilflow.app',
+  'https://agilflow.app',
+  'https://agilflow-react.vercel.app'
+];
+
+// Ajouter les Preview Vercel autorisées depuis variable d'environnement
+if (process.env.VERCEL_PREVIEW_ORIGINS) {
+  const previewOrigins = process.env.VERCEL_PREVIEW_ORIGINS.split(',');
+  allowedOrigins.push(...previewOrigins);
+}
 
 app.use(cors({
   origin: (origin, callback) => {
+    // Autoriser les requêtes sans origin (Postman, curl, etc.)
     if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) !== -1) {
+    
+    if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
+      logger.warn(`CORS blocked origin: ${origin}`);
       callback(new Error('Non autorisé par CORS'));
     }
   },
