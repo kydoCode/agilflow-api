@@ -34,7 +34,8 @@ const allowedOrigins = [
   'https://www.agilflow.app',
   'https://agilflow.app',
   'https://agilflow-react.vercel.app',
-  'https://agilflow-react-git-main-kodys-projects-a2c5b5b8.vercel.app'
+  'https://agilflow-react-git-main-kodys-projects-a2c5b5b8.vercel.app',
+  'https://agilflow-react-cwk5roqo2-kydokody-gmailcoms-projects.vercel.app'
 ];
 
 // Ajouter les Preview Vercel autorisées depuis variable d'environnement
